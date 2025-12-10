@@ -1,0 +1,76 @@
+{
+  "timestamp": "20251209_223435",
+  "sections": [
+    {
+      "name": "Backtest After Training",
+      "timestamp": "2025-12-09T22:34:35.219559",
+      "metrics": {
+        "backtest_test_samples": 1725,
+        "backtest_test_start_idx": 9769
+      },
+      "warnings": [],
+      "data_samples": {}
+    },
+    {
+      "name": "Backtest Execution",
+      "timestamp": "2025-12-09T22:35:16.925586",
+      "metrics": {
+        "backtest_bars": 1725,
+        "backtest_initial_capital": 10000.0,
+        "backtest_min_quality": "C",
+        "backtest_min_trend_prob": 0.5,
+        "backtest_min_bounce_prob": 0.5,
+        "backtest_stop_loss_atr": 1.0,
+        "backtest_take_profit_rr": 2.0,
+        "feature_count": 479,
+        "backtest_total_bars": 1725,
+        "backtest_signals_checked": 1474,
+        "backtest_trend_up_signals": 245,
+        "backtest_trend_down_signals": 253,
+        "backtest_trend_neutral_signals": 976,
+        "backtest_quality_A": 9,
+        "backtest_quality_B": 84,
+        "backtest_quality_C": 1381,
+        "backtest_rejected_quality": 0,
+        "backtest_rejected_trend_prob": 38,
+        "backtest_rejected_bounce_prob": 1042,
+        "backtest_accepted_signals": 95,
+        "backtest_total_trades": 95,
+        "backtest_win_rate": 0.8315789473684211,
+        "backtest_total_pnl": 145889.18481590753,
+        "backtest_profit_factor": 11.514794865806214
+      },
+      "warnings": [],
+      "data_samples": {}
+    }
+  ],
+  "all_metrics": {
+    "backtest_test_samples": 1725,
+    "backtest_test_start_idx": 9769,
+    "backtest_bars": 1725,
+    "backtest_initial_capital": 10000.0,
+    "backtest_min_quality": "C",
+    "backtest_min_trend_prob": 0.5,
+    "backtest_min_bounce_prob": 0.5,
+    "backtest_stop_loss_atr": 1.0,
+    "backtest_take_profit_rr": 2.0,
+    "feature_count": 479,
+    "backtest_total_bars": 1725,
+    "backtest_signals_checked": 1474,
+    "backtest_trend_up_signals": 245,
+    "backtest_trend_down_signals": 253,
+    "backtest_trend_neutral_signals": 976,
+    "backtest_quality_A": 9,
+    "backtest_quality_B": 84,
+    "backtest_quality_C": 1381,
+    "backtest_rejected_quality": 0,
+    "backtest_rejected_trend_prob": 38,
+    "backtest_rejected_bounce_prob": 1042,
+    "backtest_accepted_signals": 95,
+    "backtest_total_trades": 95,
+    "backtest_win_rate": 0.8315789473684211,
+    "backtest_total_pnl": 145889.18481590753,
+    "backtest_profit_factor": 11.514794865806214
+  },
+  "all_warnings": []
+}

@@ -1,0 +1,370 @@
+
+================================================================================
+TRENDFOLOWER TRAINING DIAGNOSTIC LOG
+================================================================================
+Timestamp: 2025-12-09T22:34:35.218451
+Log File:  logs\training_diagnostic_20251209_223435.txt
+================================================================================
+
+PURPOSE: This log captures internal state during training to help identify:
+- Data leakage (features that shouldn't be used)
+- Label distribution issues
+- Feature-label correlations that are too high (suspicious)
+- Model behavior anomalies
+- Any other issues with the training pipeline
+
+
+
+================================================================================
+[SECTION] Backtest After Training
+================================================================================
+Time: 2025-12-09T22:34:35.219566
+  backtest_test_samples: 1725
+  backtest_test_start_idx: 9769
+
+
+================================================================================
+[SECTION] Backtest Execution
+================================================================================
+Time: 2025-12-09T22:35:16.925598
+  backtest_bars: 1725
+  backtest_initial_capital: 10000.0
+  backtest_min_quality: C
+  backtest_min_trend_prob: 0.5
+  backtest_min_bounce_prob: 0.5
+  backtest_stop_loss_atr: 1.0
+  backtest_take_profit_rr: 2.0
+
+  ✓ VERIFIED: No label columns in feature_cols
+  feature_count: 479
+
+  First 10 feature columns: ['1m_value', '1m_net_side', '1m_net_volume', '1m_net_value', '1m_avg_tick_dir', '1m_buy_volume', '1m_sell_volume', '1m_buy_sell_imbalance', '1m_vwap', '1m_trade_intensity']
+
+  Signal Statistics:
+  backtest_total_bars: 1725
+  backtest_signals_checked: 1474
+  backtest_trend_up_signals: 245
+  backtest_trend_down_signals: 253
+  backtest_trend_neutral_signals: 976
+  backtest_quality_A: 9
+  backtest_quality_B: 84
+  backtest_quality_C: 1381
+  backtest_rejected_quality: 0
+  backtest_rejected_trend_prob: 38
+  backtest_rejected_bounce_prob: 1042
+  backtest_accepted_signals: 95
+
+  Signal Breakdown (of 1474 bars checked):
+    Trend UP predictions:    245 (16.6%)
+    Trend DOWN predictions:  253 (17.2%)
+    Trend NEUTRAL predictions: 976 (66.2%)
+
+    Quality A signals: 9
+    Quality B signals: 84
+    Quality C signals: 1381
+
+    Rejected (quality):      0
+    Rejected (trend prob):   38
+    Rejected (bounce prob):  1042
+    ACCEPTED signals:        95
+
+  Trade Details:
+    #   Entry Time           Exit Time            Dir   Entry      Exit       P&L        Result Grade Exit Reason 
+    -------------------------------------------------------------------------------------------------------------------
+    1   2025-12-07 21:36     2025-12-07 21:42     SHORT 345.600006 343.595707 $400.00    WIN    B     take_profit 
+    2   2025-12-07 21:56     2025-12-07 22:02     LONG  338.619995 337.458566 $-208.00   LOSS   C     stop_loss   
+    3   2025-12-07 22:01     2025-12-07 22:03     SHORT 339.200012 337.248579 $407.68    WIN    B     take_profit 
+    4   2025-12-07 22:05     2025-12-07 22:07     LONG  334.720001 333.456432 $-211.99   LOSS   C     stop_loss   
+    5   2025-12-07 22:06     2025-12-07 22:10     LONG  333.519989 336.205697 $415.51    WIN    C     take_profit 
+    6   2025-12-07 22:50     2025-12-07 22:55     SHORT 338.119995 336.084276 $432.13    WIN    C     take_profit 
+    7   2025-12-07 22:54     2025-12-07 22:58     SHORT 337.320007 335.572863 $449.41    WIN    B     take_profit 
+    8   2025-12-07 23:30     2025-12-07 23:35     LONG  336.440002 338.138567 $467.39    WIN    B     take_profit 
+    9   2025-12-07 23:34     2025-12-07 23:43     LONG  337.029999 338.811423 $486.08    WIN    B     take_profit 
+    10  2025-12-07 23:42     2025-12-07 23:46     LONG  337.940002 339.499996 $505.53    WIN    B     take_profit 
+    11  2025-12-07 23:45     2025-12-07 23:50     LONG  339.070007 340.792860 $525.75    WIN    B     take_profit 
+    12  2025-12-07 23:49     2025-12-07 23:51     LONG  340.559998 342.334281 $546.78    WIN    B     take_profit 
+    13  2025-12-07 23:50     2025-12-07 23:52     LONG  341.040009 342.878579 $568.65    WIN    B     take_profit 
+    14  2025-12-08 00:00     2025-12-08 00:07     LONG  341.339996 343.924282 $591.40    WIN    A     take_profit 
+    15  2025-12-08 00:06     2025-12-08 00:10     LONG  342.559998 345.085715 $615.05    WIN    B     take_profit 
+    16  2025-12-08 00:10     2025-12-08 00:17     LONG  343.420013 345.890019 $639.65    WIN    B     take_profit 
+    17  2025-12-08 00:21     2025-12-08 00:26     LONG  346.160004 348.434283 $665.24    WIN    B     take_profit 
+    18  2025-12-08 00:28     2025-12-08 00:30     LONG  347.559998 346.387142 $-345.93   LOSS   B     stop_loss   
+    19  2025-12-08 00:29     2025-12-08 00:31     LONG  347.690002 346.580002 $-339.01   LOSS   B     stop_loss   
+    20  2025-12-08 01:08     2025-12-08 01:16     LONG  344.170013 343.306440 $-332.23   LOSS   C     stop_loss   
+    21  2025-12-08 01:33     2025-12-08 01:39     LONG  346.399994 348.754299 $651.16    WIN    B     take_profit 
+    22  2025-12-08 01:49     2025-12-08 01:52     LONG  350.589996 349.474995 $-338.61   LOSS   B     stop_loss   
+    23  2025-12-08 01:51     2025-12-08 02:32     LONG  349.790009 348.668577 $-331.83   LOSS   B     stop_loss   
+    24  2025-12-08 02:35     2025-12-08 02:37     LONG  348.600006 349.787136 $650.39    WIN    C     take_profit 
+    25  2025-12-08 04:05     2025-12-08 04:10     SHORT 353.529999 351.797137 $676.41    WIN    C     take_profit 
+    26  2025-12-08 04:30     2025-12-08 04:32     LONG  350.720001 352.188568 $703.47    WIN    B     take_profit 
+    27  2025-12-08 04:31     2025-12-08 04:35     LONG  351.890015 353.444297 $731.60    WIN    C     take_profit 
+    28  2025-12-08 04:45     2025-12-08 04:47     SHORT 358.320007 355.811445 $760.87    WIN    C     take_profit 
+    29  2025-12-08 04:46     2025-12-08 04:51     SHORT 355.989990 353.118570 $791.30    WIN    C     take_profit 
+    30  2025-12-08 05:25     2025-12-08 05:33     LONG  353.149994 354.678563 $822.95    WIN    B     take_profit 
+    31  2025-12-08 05:56     2025-12-08 05:58     LONG  354.239990 355.684274 $855.87    WIN    C     take_profit 
+    32  2025-12-08 05:57     2025-12-08 05:59     LONG  354.200012 355.597151 $890.11    WIN    C     take_profit 
+    33  2025-12-08 06:00     2025-12-08 06:04     LONG  354.940002 356.409995 $925.71    WIN    B     take_profit 
+    34  2025-12-08 06:03     2025-12-08 06:05     LONG  355.359985 356.868548 $962.74    WIN    B     take_profit 
+    35  2025-12-08 06:11     2025-12-08 06:15     LONG  355.769989 357.449977 $1001.25   WIN    A     take_profit 
+    36  2025-12-08 06:31     2025-12-08 06:43     LONG  359.649994 362.102844 $1041.30   WIN    B     take_profit 
+    37  2025-12-08 06:42     2025-12-08 06:44     LONG  359.799988 361.668557 $1082.95   WIN    B     take_profit 
+    38  2025-12-08 06:44     2025-12-08 06:46     LONG  362.260010 361.005007 $-563.14   LOSS   B     stop_loss   
+    39  2025-12-08 06:45     2025-12-08 06:47     LONG  361.589996 364.109998 $1103.75   WIN    B     take_profit 
+    40  2025-12-08 06:46     2025-12-08 06:48     LONG  363.109985 365.851414 $1147.89   WIN    B     take_profit 
+    41  2025-12-08 06:47     2025-12-08 06:49     LONG  362.799988 365.751417 $1193.81   WIN    B     take_profit 
+    42  2025-12-08 06:56     2025-12-08 07:03     LONG  366.950012 371.337158 $1241.56   WIN    B     take_profit 
+    43  2025-12-08 07:05     2025-12-08 07:07     SHORT 373.250000 374.738573 $-645.61   LOSS   C     stop_loss   
+    44  2025-12-08 07:06     2025-12-08 07:09     SHORT 373.739990 370.692845 $1265.40   WIN    C     take_profit 
+    45  2025-12-08 07:15     2025-12-08 07:21     SHORT 373.149994 375.044274 $-658.01   LOSS   C     stop_loss   
+    46  2025-12-08 08:00     2025-12-08 08:06     LONG  368.209991 371.248570 $1289.70   WIN    C     take_profit 
+    47  2025-12-08 09:04     2025-12-08 09:08     LONG  374.140015 376.878575 $1341.28   WIN    B     take_profit 
+    48  2025-12-08 09:07     2025-12-08 09:12     LONG  376.429993 379.599984 $1394.94   WIN    B     take_profit 
+    49  2025-12-08 09:11     2025-12-08 09:13     LONG  379.019989 382.845694 $1450.73   WIN    B     take_profit 
+    50  2025-12-08 09:26     2025-12-08 09:39     SHORT 389.549988 392.312125 $-754.38   LOSS   C     stop_loss   
+    51  2025-12-08 10:05     2025-12-08 10:08     LONG  387.760010 390.490016 $1478.59   WIN    C     take_profit 
+    52  2025-12-08 10:07     2025-12-08 10:09     LONG  389.070007 391.780016 $1537.73   WIN    B     take_profit 
+    53  2025-12-08 10:30     2025-12-08 10:35     LONG  391.000000 393.541421 $1599.24   WIN    B     take_profit 
+    54  2025-12-08 11:15     2025-12-08 11:17     LONG  393.890015 396.345734 $1663.21   WIN    B     take_profit 
+    55  2025-12-08 11:31     2025-12-08 11:33     SHORT 394.350006 392.285719 $1729.74   WIN    C     take_profit 
+    56  2025-12-08 11:46     2025-12-08 12:05     LONG  384.619995 388.119982 $1798.93   WIN    C     take_profit 
+    57  2025-12-08 12:05     2025-12-08 12:08     SHORT 389.100006 386.928580 $1870.88   WIN    B     take_profit 
+    58  2025-12-08 12:07     2025-12-08 12:09     SHORT 388.320007 385.952868 $1945.72   WIN    C     take_profit 
+    59  2025-12-08 12:10     2025-12-08 12:12     LONG  383.250000 381.727857 $-1011.77  LOSS   C     stop_loss   
+    60  2025-12-08 12:11     2025-12-08 12:15     LONG  381.670013 384.790009 $1983.08   WIN    C     take_profit 
+    61  2025-12-08 12:16     2025-12-08 12:27     SHORT 384.950012 381.634295 $2062.40   WIN    A     take_profit 
+    62  2025-12-08 14:30     2025-12-08 14:32     LONG  386.559998 388.759997 $2144.90   WIN    B     take_profit 
+    63  2025-12-08 14:31     2025-12-08 14:33     LONG  386.920013 389.175729 $2230.69   WIN    C     take_profit 
+    64  2025-12-08 14:32     2025-12-08 14:34     LONG  388.559998 391.020002 $2319.92   WIN    B     take_profit 
+    65  2025-12-08 14:33     2025-12-08 14:35     LONG  391.290009 394.867157 $2412.72   WIN    B     take_profit 
+    66  2025-12-08 14:40     2025-12-08 14:46     LONG  396.920013 404.161451 $2509.23   WIN    B     take_profit 
+    67  2025-12-08 14:57     2025-12-08 15:02     LONG  404.880005 401.530720 $-1304.80  LOSS   B     stop_loss   
+    68  2025-12-08 15:45     2025-12-08 15:50     LONG  397.459991 401.481415 $2557.40   WIN    B     take_profit 
+    69  2025-12-08 16:01     2025-12-08 16:09     LONG  399.730011 403.205719 $2659.70   WIN    B     take_profit 
+    70  2025-12-08 16:08     2025-12-08 16:10     LONG  402.190002 405.464281 $2766.09   WIN    B     take_profit 
+    71  2025-12-08 16:14     2025-12-08 16:19     LONG  404.500000 408.815704 $2876.73   WIN    B     take_profit 
+    72  2025-12-08 16:18     2025-12-08 16:20     LONG  407.040009 411.435721 $2991.80   WIN    B     take_profit 
+    73  2025-12-08 16:25     2025-12-08 16:27     LONG  416.570007 422.987161 $3111.47   WIN    B     take_profit 
+    74  2025-12-08 17:41     2025-12-08 17:50     LONG  413.200012 416.762878 $3235.93   WIN    C     take_profit 
+    75  2025-12-08 18:20     2025-12-08 18:22     SHORT 418.649994 416.308559 $3365.37   WIN    B     take_profit 
+    76  2025-12-08 18:21     2025-12-08 18:23     SHORT 418.559998 416.264278 $3499.98   WIN    B     take_profit 
+    77  2025-12-08 18:22     2025-12-08 18:27     SHORT 415.920013 413.272866 $3639.98   WIN    C     take_profit 
+    78  2025-12-08 18:26     2025-12-08 18:28     SHORT 413.899994 411.058563 $3785.58   WIN    B     take_profit 
+    79  2025-12-08 18:28     2025-12-08 18:30     LONG  408.100006 406.354292 $-1968.50  LOSS   C     stop_loss   
+    80  2025-12-08 19:10     2025-12-08 19:16     SHORT 410.350006 407.161434 $3858.27   WIN    B     take_profit 
+    81  2025-12-08 19:20     2025-12-08 19:23     SHORT 409.790009 407.018576 $4012.60   WIN    A     take_profit 
+    82  2025-12-08 19:22     2025-12-08 19:24     SHORT 408.820007 406.010005 $4173.10   WIN    B     take_profit 
+    83  2025-12-08 19:55     2025-12-08 20:03     SHORT 406.100006 407.438586 $-2170.01  LOSS   B     stop_loss   
+    84  2025-12-08 21:25     2025-12-08 21:29     LONG  409.230011 411.380009 $4253.22   WIN    C     take_profit 
+    85  2025-12-08 21:47     2025-12-08 21:52     LONG  413.500000 415.964294 $4423.35   WIN    B     take_profit 
+    86  2025-12-08 21:55     2025-12-08 21:58     LONG  413.470001 415.770020 $4600.29   WIN    B     take_profit 
+    87  2025-12-08 23:00     2025-12-08 23:03     SHORT 413.799988 412.052848 $4784.30   WIN    B     take_profit 
+    88  2025-12-08 23:02     2025-12-08 23:04     SHORT 412.980011 411.018590 $4975.67   WIN    A     take_profit 
+    89  2025-12-08 23:03     2025-12-08 23:05     SHORT 411.950012 409.972874 $5174.70   WIN    B     take_profit 
+    90  2025-12-08 23:08     2025-12-08 23:11     SHORT 411.309998 412.452853 $-2690.84  LOSS   B     stop_loss   
+    91  2025-12-08 23:11     2025-12-08 23:17     SHORT 412.140015 409.784306 $5274.05   WIN    B     take_profit 
+    92  2025-12-08 23:16     2025-12-08 23:18     SHORT 410.940002 408.640002 $5485.01   WIN    B     take_profit 
+    93  2025-12-08 23:30     2025-12-08 23:34     SHORT 408.170013 405.358590 $5704.41   WIN    A     take_profit 
+    94  2025-12-08 23:40     2025-12-08 23:50     SHORT 406.899994 404.345703 $5932.59   WIN    A     take_profit 
+    95  2025-12-08 23:56     2025-12-08 23:59     SHORT 405.690002 405.100006 $1641.85   WIN    A     end_of_data 
+
+  Trade Probabilities:
+    #   TrendP   BounceP   Pullback   Aligned   
+    ---------------------------------------------
+    1   92.1%    53.9%     No         Yes       
+    2   53.4%    57.4%     No         No        
+    3   59.9%    52.6%     No         Yes       
+    4   54.1%    55.8%     No         No        
+    5   50.1%    57.5%     No         No        
+    6   85.9%    65.1%     No         No        
+    7   65.6%    59.5%     Yes        No        
+    8   88.7%    57.8%     Yes        Yes       
+    9   74.1%    56.9%     No         Yes       
+    10  68.4%    56.2%     No         Yes       
+    11  81.5%    82.0%     No         Yes       
+    12  65.8%    74.7%     No         Yes       
+    13  59.2%    66.3%     No         Yes       
+    14  83.6%    85.4%     Yes        Yes       
+    15  79.8%    86.1%     No         Yes       
+    16  62.5%    68.0%     No         Yes       
+    17  60.4%    80.9%     No         Yes       
+    18  50.8%    78.3%     No         Yes       
+    19  52.5%    79.8%     No         Yes       
+    20  63.0%    57.0%     No         No        
+    21  56.6%    77.8%     No         Yes       
+    22  54.6%    83.9%     No         Yes       
+    23  54.8%    86.3%     No         Yes       
+    24  86.4%    57.1%     No         No        
+    25  60.0%    51.6%     No         No        
+    26  91.2%    79.6%     Yes        No        
+    27  77.0%    81.7%     No         No        
+    28  62.4%    55.4%     No         No        
+    29  53.3%    54.7%     No         No        
+    30  71.7%    52.2%     Yes        No        
+    31  57.5%    54.5%     No         No        
+    32  53.2%    53.9%     No         No        
+    33  84.8%    68.4%     Yes        No        
+    34  70.7%    70.9%     Yes        No        
+    35  66.9%    76.8%     Yes        Yes       
+    36  60.7%    95.5%     No         Yes       
+    37  84.8%    95.0%     No         Yes       
+    38  50.8%    93.0%     No         Yes       
+    39  74.8%    94.9%     No         Yes       
+    40  58.0%    90.7%     No         Yes       
+    41  65.4%    92.5%     No         Yes       
+    42  51.4%    91.8%     No         Yes       
+    43  56.2%    85.4%     No         No        
+    44  56.3%    87.8%     No         No        
+    45  50.6%    54.0%     No         No        
+    46  87.8%    65.1%     No         No        
+    47  76.1%    86.2%     No         Yes       
+    48  81.5%    86.6%     No         Yes       
+    49  59.7%    83.8%     No         Yes       
+    50  51.2%    56.2%     No         No        
+    51  82.5%    85.6%     No         No        
+    52  69.6%    65.7%     Yes        No        
+    53  65.2%    68.3%     No         Yes       
+    54  63.5%    87.9%     Yes        No        
+    55  66.1%    59.4%     No         No        
+    56  56.4%    60.6%     No         No        
+    57  88.6%    77.8%     No         Yes       
+    58  88.6%    82.4%     No         No        
+    59  50.1%    62.7%     No         No        
+    60  61.5%    58.6%     No         No        
+    61  65.9%    61.5%     Yes        Yes       
+    62  90.1%    90.9%     Yes        No        
+    63  89.1%    91.0%     No         No        
+    64  81.9%    88.6%     No         Yes       
+    65  59.6%    84.4%     No         Yes       
+    66  50.0%    88.2%     No         Yes       
+    67  61.1%    85.1%     No         Yes       
+    68  66.7%    57.0%     Yes        No        
+    69  85.3%    58.8%     Yes        Yes       
+    70  76.8%    71.1%     No         Yes       
+    71  58.2%    52.4%     No         Yes       
+    72  85.6%    77.3%     No         Yes       
+    73  56.9%    86.7%     No         Yes       
+    74  54.3%    60.1%     No         No        
+    75  95.3%    52.3%     Yes        No        
+    76  96.1%    59.7%     Yes        No        
+    77  81.3%    74.6%     No         No        
+    78  58.9%    76.4%     No         Yes       
+    79  53.5%    66.7%     No         No        
+    80  65.1%    50.2%     Yes        No        
+    81  77.7%    61.9%     Yes        Yes       
+    82  65.0%    50.8%     Yes        Yes       
+    83  52.8%    65.2%     No         Yes       
+    84  86.8%    57.8%     No         No        
+    85  74.1%    57.3%     Yes        Yes       
+    86  83.3%    70.2%     No         Yes       
+    87  93.8%    70.1%     Yes        No        
+    88  93.6%    75.3%     Yes        Yes       
+    89  72.4%    78.1%     No         Yes       
+    90  50.6%    53.6%     No         Yes       
+    91  87.1%    51.6%     Yes        Yes       
+    92  88.3%    70.1%     No         Yes       
+    93  63.5%    77.2%     Yes        Yes       
+    94  67.9%    67.3%     Yes        Yes       
+    95  59.5%    67.1%     Yes        Yes       
+  backtest_total_trades: 95
+  backtest_win_rate: 0.8315789473684211
+  backtest_total_pnl: 145889.18481590753
+  backtest_profit_factor: 11.514794865806214
+
+  ✓ VERIFIED: One position at a time (matches live trading)
+
+
+================================================================================
+GRADE ANALYSIS - INVESTIGATING A-GRADE PERFORMANCE
+================================================================================
+
+  Grade Definitions:
+    A: bounce_prob > 0.6 AND trend_aligned AND is_pullback
+    B: bounce_prob > 0.5 AND (trend_aligned OR is_pullback)
+    C: Everything else
+
+  --- Grade A Analysis ---
+    Total signals: 9
+    Trades executed: 8
+    Win rate: 100.0% (8W / 0L)
+
+    WINNING trades (8):
+      Avg trend_prob:   72.3%
+      Avg bounce_prob:  71.6%
+      Avg dist_from_ema: 0.19 ATR
+      % in pullback:    100%
+      % trend aligned:  100%
+      Exit reasons: {'take_profit': 7, 'end_of_data': 1}
+
+    LONG trades: 2, win rate: 100%
+    SHORT trades: 6, win rate: 100%
+
+  --- Grade B Analysis ---
+    Total signals: 84
+    Trades executed: 59
+    Win rate: 86.4% (51W / 8L)
+
+    WINNING trades (51):
+      Avg trend_prob:   73.0%
+      Avg bounce_prob:  72.6%
+      Avg dist_from_ema: 1.00 ATR
+      % in pullback:    35%
+      % trend aligned:  75%
+      Exit reasons: {'take_profit': 51}
+
+    LOSING trades (8):
+      Avg trend_prob:   53.5%
+      Avg bounce_prob:  78.1%
+      Avg dist_from_ema: 1.31 ATR
+      % in pullback:    0%
+      % trend aligned:  100%
+      Exit reasons: {'stop_loss': 8}
+
+    LONG trades: 44, win rate: 86%
+    SHORT trades: 15, win rate: 87%
+
+  --- Grade C Analysis ---
+    Total signals: 1381
+    Trades executed: 28
+    Win rate: 71.4% (20W / 8L)
+
+    WINNING trades (20):
+      Avg trend_prob:   69.8%
+      Avg bounce_prob:  65.7%
+      Avg dist_from_ema: 1.93 ATR
+      % in pullback:    0%
+      % trend aligned:  0%
+      Exit reasons: {'take_profit': 20}
+
+    LOSING trades (8):
+      Avg trend_prob:   54.0%
+      Avg bounce_prob:  61.9%
+      Avg dist_from_ema: 2.68 ATR
+      % in pullback:    0%
+      % trend aligned:  0%
+      Exit reasons: {'stop_loss': 8}
+
+    LONG trades: 17, win rate: 71%
+    SHORT trades: 11, win rate: 73%
+
+  --- Summary Comparison ---
+    Grade  Signals    Trades   Win Rate   Avg BounceP 
+    --------------------------------------------------
+    A      9          8        100.0     % 71.6        %
+    B      84         59       86.4      % 73.3        %
+    C      1381       28       71.4      % 64.6        %
+
+  --- Hypothesis Analysis ---
+    A-grade avg bounce_prob: 71.6%
+    B-grade avg bounce_prob: 73.3%
+
+
+================================================================================
+SUMMARY
+================================================================================
+
+Total Sections: 2
+
+✓ No warnings detected
+
+Log saved to: logs\training_diagnostic_20251209_223435.txt
+JSON saved to: logs\training_diagnostic_20251209_223435.json

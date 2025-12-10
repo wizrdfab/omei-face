@@ -1,0 +1,390 @@
+
+================================================================================
+TRENDFOLOWER TRAINING DIAGNOSTIC LOG
+================================================================================
+Timestamp: 2025-12-09T22:33:22.566871
+Log File:  logs\training_diagnostic_20251209_223322.txt
+================================================================================
+
+PURPOSE: This log captures internal state during training to help identify:
+- Data leakage (features that shouldn't be used)
+- Label distribution issues
+- Feature-label correlations that are too high (suspicious)
+- Model behavior anomalies
+- Any other issues with the training pipeline
+
+
+
+================================================================================
+[SECTION] 1. Data Loading
+================================================================================
+Time: 2025-12-09T22:33:22.567895
+  total_trades: 3313761
+  sample_rate: 0.4
+
+  DataFrame: trades
+    Shape: 3,313,761 rows x 12 columns
+    Memory: 720.88 MB
+    Null values: 0
+    Columns: ['timestamp', 'symbol', 'side', 'size', 'price', 'tickDirection', 'datetime', 'side_num', 'tick_dir_num', 'value', 'signed_size', 'signed_value']
+
+
+================================================================================
+[SECTION] 2. Bar Creation
+================================================================================
+Time: 2025-12-09T22:33:42.775290
+  base_timeframe: 1m
+  bars_1m: 11520
+
+  DataFrame: bars_1m
+    Shape: 11,520 rows x 19 columns
+    Memory: 1.36 MB
+    Null values: 0
+    Columns: ['bar_time', 'open', 'high', 'low', 'close', 'volume', 'value', 'net_side', 'net_volume', 'net_value', 'avg_tick_dir', 'trade_count', 'datetime', 'buy_volume', 'sell_volume', 'buy_sell_imbalance', 'vwap', 'trade_intensity', 'avg_trade_size']
+  bars_5m: 2304
+  bars_15m: 768
+  bars_30m: 384
+  bars_1h: 192
+  bars_4h: 48
+
+
+================================================================================
+[SECTION] 3. Feature Calculation
+================================================================================
+Time: 2025-12-09T22:33:47.319892
+  num_features: 479
+
+  Feature Columns (479 total):
+  ✓ No suspicious feature names detected
+
+  First 30 features: ['1m_value', '1m_net_side', '1m_net_volume', '1m_net_value', '1m_avg_tick_dir', '1m_buy_volume', '1m_sell_volume', '1m_buy_sell_imbalance', '1m_vwap', '1m_trade_intensity', '1m_avg_trade_size', '1m_ema_9', '1m_ema_9_slope', '1m_ema_10', '1m_ema_10_slope', '1m_ema_21', '1m_ema_21_slope', '1m_ema_50', '1m_ema_50_slope', '1m_ema_100', '1m_ema_100_slope', '1m_atr', '1m_sma_20', '1m_sma_20_slope', '1m_kijun_26', '1m_kijun_26_slope', '1m_price_vs_ema_9', '1m_ema_9_slope_norm', '1m_price_vs_ema_10', '1m_ema_10_slope_norm']
+  ... and 449 more
+
+  DataFrame: featured_data
+    Shape: 11,520 rows x 505 columns
+    Memory: 40.61 MB
+    Null values: 287,359
+    Columns with nulls: ['1m_ema_9_slope', '1m_ema_10_slope', '1m_ema_21_slope', '1m_ema_50_slope', '1m_ema_100_slope', '1m_atr', '1m_sma_20', '1m_sma_20_slope', '1m_kijun_26', '1m_kijun_26_slope']
+
+
+================================================================================
+[SECTION] 4. Label Generation
+================================================================================
+Time: 2025-12-09T22:34:01.288362
+  labeled_samples: 11494
+  final_feature_count: 479
+
+  Label Distribution: trend_label
+    Total samples: 11,494
+    Class -1.0: 2,883 (25.1%)
+    Class 0.0: 5,812 (50.6%)
+    Class 1.0: 2,799 (24.4%)
+
+  Label Distribution: regime
+    Total samples: 11,494
+    Class 0: 4,612 (40.1%)
+    Class 1: 3,385 (29.5%)
+    Class 2: 3,286 (28.6%)
+    Class 3: 211 (1.8%)
+
+  Label Distribution: pullback_success
+    Total samples: 2,567
+    Class 0.0: 1,786 (69.6%)
+    Class 1.0: 781 (30.4%)
+
+  Feature Columns (479 total):
+  ✓ No suspicious feature names detected
+
+  First 30 features: ['1m_value', '1m_net_side', '1m_net_volume', '1m_net_value', '1m_avg_tick_dir', '1m_buy_volume', '1m_sell_volume', '1m_buy_sell_imbalance', '1m_vwap', '1m_trade_intensity', '1m_avg_trade_size', '1m_ema_9', '1m_ema_9_slope', '1m_ema_10', '1m_ema_10_slope', '1m_ema_21', '1m_ema_21_slope', '1m_ema_50', '1m_ema_50_slope', '1m_ema_100', '1m_ema_100_slope', '1m_atr', '1m_sma_20', '1m_sma_20_slope', '1m_kijun_26', '1m_kijun_26_slope', '1m_price_vs_ema_9', '1m_ema_9_slope_norm', '1m_price_vs_ema_10', '1m_ema_10_slope_norm']
+  ... and 449 more
+
+
+================================================================================
+[SECTION] 5. Data Split
+================================================================================
+Time: 2025-12-09T22:34:04.760325
+
+  Train/Val/Test Split:
+    Train: 8,045 samples
+      Time range: 2025-12-01 00:26:00 to 2025-12-06 14:30:00
+    Val: 1,724 samples
+      Time range: 2025-12-06 14:31:00 to 2025-12-07 19:14:00
+    Test: 1,725 samples
+      Time range: 2025-12-07 19:15:00 to 2025-12-08 23:59:00
+    ✓ No time overlap between train and test
+
+
+================================================================================
+[SECTION] 5b. Leakage Detection - Feature-Label Correlations
+================================================================================
+Time: 2025-12-09T22:34:04.813523
+
+  Feature-Label Correlations (trend_label):
+
+  Top 20 correlations:
+    15m_anchor_vwap_15m_distance_atr: 0.3992
+    15m_anchor_vwap_15m_distance_pct: 0.3875
+    30m_anchor_vwap_30m_distance_pct: 0.3855
+    30m_anchor_vwap_30m_distance_atr: 0.3838
+    15m_returns: 0.3552
+    15m_candle_direction: 0.3537
+    30m_candle_direction: 0.3493
+    30m_returns: 0.3400
+    5m_anchor_vwap_5m_distance_atr: 0.3233
+    5m_anchor_vwap_5m_distance_pct: 0.3182
+    15m_avg_tick_dir: 0.3062
+    1h_returns: 0.3028
+    1h_candle_direction: 0.2872
+    30m_avg_tick_dir: 0.2863
+    30m_buy_sell_imbalance: 0.2678
+    15m_net_side: 0.2651
+    5m_returns: 0.2535
+    30m_net_side: 0.2493
+    30m_net_volume: 0.2464
+    15m_buy_sell_imbalance: 0.2436
+
+  Feature-Label Correlations (regime):
+
+  Top 20 correlations:
+    1m_adx: 0.5283
+    1m_ema_alignment: 0.3707
+    1m_ema_50_slope_norm: 0.3492
+    1m_price_vs_ema_50: 0.3492
+    1m_price_vs_ema_100: 0.3448
+    1m_ema_100_slope_norm: 0.3448
+    5m_bb_position: 0.3390
+    5m_anchor_sma20_5m_distance_atr: 0.3356
+    5m_price_vs_ema_21: 0.3296
+    5m_ema_21_slope_norm: 0.3296
+    5m_price_vs_ema_10: 0.3143
+    5m_ema_10_slope_norm: 0.3143
+    5m_anchor_kijun_5m_distance_atr: 0.3126
+    1m_ema_50_slope: 0.3124
+    1m_ema_100_slope: 0.3076
+    5m_ema_9_slope_norm: 0.3073
+    5m_price_vs_ema_9: 0.3073
+    5m_anchor_ema9_5m_distance_atr: 0.3073
+    5m_anchor_sma20_5m_distance_pct: 0.3048
+    1m_di_diff: 0.3048
+
+
+================================================================================
+[SECTION] 6. Model Training
+================================================================================
+Time: 2025-12-09T22:34:05.077877
+
+  Model: TrendClassifier
+    train_accuracy: 0.9571
+    val_accuracy: 0.6305
+
+  Feature Importance (TrendClassifier) - Top 20:
+    1. 1m_dist_from_high: 265
+    2. 15m_anchor_vwap_15m_slope: 233
+    3. 1m_dist_from_low: 230
+    4. 30m_anchor_vwap_30m_slope: 192
+    5. 1m_price_vs_ema_100: 186
+    6. 5m_anchor_vwap_5m_distance_atr: 185
+    7. 1m_price_vs_ema_50: 183
+    8. 15m_anchor_vwap_15m_distance_pct: 179
+    9. 15m_returns: 175
+    10. 30m_returns: 169
+    11. 1m_price_vs_ema_21: 159
+    12. 5m_anchor_vwap_5m_distance_pct: 156
+    13. 5m_returns: 149
+    14. 1m_ema_50_slope: 144
+    15. 30m_anchor_vwap_30m_distance_pct: 136
+    16. 1h_returns: 136
+    17. 1m_momentum_10: 135
+    18. 1m_bb_position: 129
+    19. 1m_obv_slope: 125
+    20. 1m_plus_di: 122
+  pullback_samples_train: 1822
+  pullback_samples_val: 387
+
+  Label Distribution: pullback_success_train
+    Total samples: 1,822
+    Class 0: 1,245 (68.3%)
+    Class 1: 577 (31.7%)
+
+  Feature-Label Correlations (pullback_success):
+
+  Top 20 correlations:
+    5m_anchor_nearest_distance_atr: 0.1482
+    30m_anchor_nearest_distance_atr: 0.1318
+    1h_body_size: 0.1239
+    1h_kijun_26_slope: 0.1075
+    4h_body_size: 0.1009
+    30m_body_size: 0.0890
+    5m_size_ma: 0.0884
+    15m_adx_slope: 0.0880
+    30m_dist_from_high: 0.0816
+    15m_imbalance_ma: 0.0806
+    5m_sma_20: 0.0804
+    5m_anchor_sma20_5m_value: 0.0804
+    1h_adx: 0.0789
+    15m_anchor_kijun_15m_touch_rate: 0.0786
+    15m_trade_intensity: 0.0776
+    15m_intensity_ratio: 0.0770
+    30m_trade_intensity: 0.0752
+    4h_kijun_26_slope: 0.0727
+    15m_volume_ratio: 0.0718
+    4h_net_side: 0.0715
+
+  Model: EntryQualityModel
+    train_accuracy: 0.9682
+    train_precision: 0.9779
+    val_accuracy: 0.6873
+    val_precision: 0.4342
+
+  Feature Importance (EntryQualityModel) - Top 20:
+    1. 15m_returns: 44
+    2. 1m_price_vs_ema_50: 35
+    3. 1m_ema_50_slope: 34
+    4. 5m_returns: 34
+    5. 15m_price_vs_ema_9: 34
+    6. 1m_price_vs_ema_100: 33
+    7. 15m_anchor_vwap_15m_distance_atr: 32
+    8. 5m_anchor_vwap_5m_slope: 29
+    9. 1m_ema_100_slope: 27
+    10. 15m_anchor_vwap_15m_slope: 27
+    11. 30m_anchor_vwap_30m_slope: 26
+    12. 1m_dist_from_low: 25
+    13. 5m_lower_wick: 25
+    14. 5m_net_side: 23
+    15. 15m_avg_tick_dir: 22
+    16. 1m_adx: 20
+    17. 5m_avg_tick_dir: 19
+    18. 5m_ema_9_slope: 19
+    19. 5m_momentum_5: 19
+    20. 5m_upper_wick: 19
+
+
+================================================================================
+[SECTION] 6c. Regime Classifier Training
+================================================================================
+Time: 2025-12-09T22:34:23.622595
+
+  Label Distribution: regime_train
+    Total samples: 8,045
+    Class 0: 3,219 (40.0%)
+    Class 1: 2,134 (26.5%)
+    Class 2: 2,537 (31.5%)
+    Class 3: 155 (1.9%)
+
+  Feature-Label Correlations (regime):
+
+  Top 20 correlations:
+    1m_adx: 0.5283
+    1m_ema_alignment: 0.3707
+    1m_ema_50_slope_norm: 0.3492
+    1m_price_vs_ema_50: 0.3492
+    1m_price_vs_ema_100: 0.3448
+    1m_ema_100_slope_norm: 0.3448
+    5m_bb_position: 0.3390
+    5m_anchor_sma20_5m_distance_atr: 0.3356
+    5m_price_vs_ema_21: 0.3296
+    5m_ema_21_slope_norm: 0.3296
+    5m_price_vs_ema_10: 0.3143
+    5m_ema_10_slope_norm: 0.3143
+    5m_anchor_kijun_5m_distance_atr: 0.3126
+    1m_ema_50_slope: 0.3124
+    1m_ema_100_slope: 0.3076
+    5m_ema_9_slope_norm: 0.3073
+    5m_price_vs_ema_9: 0.3073
+    5m_anchor_ema9_5m_distance_atr: 0.3073
+    5m_anchor_sma20_5m_distance_pct: 0.3048
+    1m_di_diff: 0.3048
+
+  NOTE: Regime is a deterministic function of 1m_adx and 1m_ema_alignment
+  This is expected to achieve ~100% accuracy (not leakage, just trivial task)
+
+  Model: RegimeClassifier
+    train_accuracy: 1.0000
+    ⚠️ WARNING: RegimeClassifier train_accuracy = 1.0000 (suspiciously high)
+    val_accuracy: 0.9983
+    ⚠️ WARNING: RegimeClassifier val_accuracy = 0.9983 (suspiciously high)
+
+  Feature Importance (RegimeClassifier) - Top 20:
+    1. 1m_adx: 3030
+    2. 1m_ema_alignment: 1254
+    3. 1m_atr_percentile: 1093
+    4. 1m_value: 676
+    5. 1m_anchor_vwap_1m_distance_atr: 271
+    6. 1h_obv_slope: 148
+    7. 1m_net_side: 131
+    8. 1m_obv: 123
+    9. 1m_upper_wick: 111
+    10. 5m_size_ma: 110
+    11. 1h_lower_wick: 99
+    12. 1m_ema_50: 94
+    13. 1m_lower_wick: 93
+    14. 1m_di_diff: 86
+    15. 15m_size_ma: 86
+    16. 1m_vwap: 85
+    17. 5m_rsi: 82
+    18. 5m_anchor_kijun_5m_touch_rate: 81
+    19. 5m_obv_slope: 79
+    20. 15m_anchor_nearest_distance_atr: 77
+
+
+================================================================================
+[SECTION] 7. Test Set Evaluation
+================================================================================
+Time: 2025-12-09T22:34:35.006244
+  trend_classifier_test_accuracy: 0.6428985507246376
+
+  Sample Predictions (TrendClassifier) - First 20:
+    Index      True       Predicted  Correct   
+    ----------------------------------------
+    0          -1.0       0.0        ✗         
+    1          0.0        0.0        ✓         
+    2          -1.0       0.0        ✗         
+    3          -1.0       -1.0       ✓         
+    4          -1.0       -1.0       ✓         
+    5          -1.0       0.0        ✗         
+    6          -1.0       0.0        ✗         
+    7          0.0        0.0        ✓         
+    8          0.0        0.0        ✓         
+    9          0.0        0.0        ✓         
+    10         0.0        0.0        ✓         
+    11         0.0        1.0        ✗         
+    12         1.0        1.0        ✓         
+    13         1.0        0.0        ✗         
+    14         1.0        0.0        ✗         
+    15         1.0        1.0        ✓         
+    16         1.0        1.0        ✓         
+    17         1.0        1.0        ✓         
+    18         1.0        1.0        ✓         
+    19         1.0        1.0        ✓         
+  trend_class_Down_accuracy: 0.5055555555555555
+  trend_class_Neutral_accuracy: 0.78177727784027
+  trend_class_Up_accuracy: 0.48739495798319327
+
+
+================================================================================
+[SECTION] 8. Final Summary
+================================================================================
+Time: 2025-12-09T22:34:35.100818
+  final_test_accuracy: 0.6428985507246376
+  result_total_trades: 3313761
+  result_base_timeframe: 1m
+  result_num_features: 479
+  result_labeled_samples: 11494
+  result_train_size: 8045
+  result_val_size: 1724
+  result_test_size: 1725
+  result_test_trend_accuracy: 0.6428985507246376
+
+
+================================================================================
+SUMMARY
+================================================================================
+
+Total Sections: 10
+
+⚠️ WARNINGS FOUND (2):
+  - ⚠️ WARNING: RegimeClassifier train_accuracy = 1.0000 (suspiciously high)
+  - ⚠️ WARNING: RegimeClassifier val_accuracy = 0.9983 (suspiciously high)
+
+Log saved to: logs\training_diagnostic_20251209_223322.txt
+JSON saved to: logs\training_diagnostic_20251209_223322.json

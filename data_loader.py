@@ -2,31 +2,67 @@
 Data loader for raw trade data from Bybit.
 Handles loading multiple CSV files and basic preprocessing.
 """
+# --- 1. PERFORMANCE SETTINGS (Must be before imports) ---
+import os
+# Force internal libraries to use 1 thread. 
+# We handle parallelism via Multiprocessing, not internal threading.
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+os.environ["OPENBLAS_NUM_THREADS"] = "1"
+os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
+os.environ["NUMEXPR_NUM_THREADS"] = "1"
+
 import pandas as pd
 import numpy as np
 from pathlib import Path
 from typing import List, Optional
+import concurrent.futures
+import multiprocessing
+import gc
+import sys
 from config import DataConfig
+
+
+# --- GLOBAL SHARED MEMORY STORAGE ---
+_shared_trades_df = None
+
+
+def _process_file(file_path: Path, use_cols: list, dtypes: dict, config: DataConfig, sample_rate: float) -> pd.DataFrame:
+    """
+    Helper function to process a single file in a separate process.
+    """
+    try:
+        # Load only needed columns with optimized dtypes
+        df = pd.read_csv(
+            file_path, 
+            usecols=lambda c: c in use_cols or c == 'symbol',
+            dtype=dtypes
+        )
+        
+        # Sample if needed
+        if sample_rate < 1.0:
+            df = df.sample(frac=sample_rate, random_state=42)
+        
+        # Sort this file's trades (Mergesort is stable)
+        df = df.sort_values(config.timestamp_col, kind='mergesort')
+        
+        return df
+    except Exception as e:
+        print(f"Error processing {file_path.name}: {e}")
+        return pd.DataFrame()
 
 
 def load_trades(config: DataConfig, verbose: bool = True, sample_rate: float = 1.0) -> pd.DataFrame:
     """
-    Load all trade CSV files from the data directory.
-    
-    Args:
-        config: DataConfig with paths and column names
-        verbose: Print progress information
-        sample_rate: Fraction of trades to keep (1.0 = all, 0.1 = 10%)
-        
-    Returns:
-        DataFrame with all trades, sorted by timestamp
+    Load all trade CSV files from the data directory concurrently.
+    Guarantees DETERMINISTIC order using stable sorts and ordered processing.
     """
     data_path = Path(config.data_dir)
     
     if not data_path.exists():
         raise FileNotFoundError(f"Data directory not found: {data_path}")
     
-    # Find all matching files
+    # Find all matching files (Sorted ensures deterministic input order)
     files = sorted(data_path.glob(config.file_pattern))
     
     if not files:
@@ -37,7 +73,6 @@ def load_trades(config: DataConfig, verbose: bool = True, sample_rate: float = 1
         for f in files:
             print(f"  - {f.name}")
     
-    # Only load columns we need to save memory
     use_cols = [
         config.timestamp_col,
         config.price_col,
@@ -45,57 +80,66 @@ def load_trades(config: DataConfig, verbose: bool = True, sample_rate: float = 1
         config.side_col,
         config.tick_direction_col,
     ]
+
+    dtypes = {
+        config.price_col: 'float32',
+        config.size_col: 'float32',
+    }
     
-    # Load files one at a time, already sorted
     all_trades = []
     total_original = 0
     
-    for file in files:
-        # Load only needed columns with optimized dtypes
-        df = pd.read_csv(
-            file, 
-            usecols=lambda c: c in use_cols or c == 'symbol',
-            dtype={
-                config.price_col: 'float32',
-                config.size_col: 'float32',
-            }
-        )
+    if verbose:
+        print(f"  Starting concurrent load on {len(files)} files...")
+
+    # Use ProcessPoolExecutor for CPU-bound CSV parsing
+    with concurrent.futures.ProcessPoolExecutor() as executor:
+        # Submit tasks in order
+        future_to_index = {
+            executor.submit(_process_file, f, use_cols, dtypes, config, sample_rate): i 
+            for i, f in enumerate(files)
+        }
         
-        total_original += len(df)
+        results = [None] * len(files)
         
-        # Sample if needed
-        if sample_rate < 1.0:
-            df = df.sample(frac=sample_rate, random_state=42)
-        
-        # Sort this file's trades
-        df = df.sort_values(config.timestamp_col)
-        
-        all_trades.append(df)
-        
-        if verbose:
-            print(f"  Loaded {file.name}: {len(df):,} trades")
-        
-        # Clear memory
-        import gc
-        gc.collect()
+        for future in concurrent.futures.as_completed(future_to_index):
+            index = future_to_index[future]
+            file_name = files[index].name
+            try:
+                df = future.result()
+                if not df.empty:
+                    total_original += (len(df) / sample_rate) if sample_rate < 1.0 else len(df)
+                    results[index] = df 
+                    if verbose:
+                        print(f"  Loaded {file_name}: {len(df):,} trades")
+                else:
+                    results[index] = pd.DataFrame()
+                
+            except Exception as exc:
+                print(f"  {file_name} generated an exception: {exc}")
+                results[index] = pd.DataFrame()
+
+    all_trades = [df for df in results if df is not None and not df.empty]
+    gc.collect()
     
-    # Concatenate (files are already sorted, so merge-sort is efficient)
     if verbose:
         print("  Merging files...")
     
+    if not all_trades:
+        raise ValueError("No trades were loaded from the files.")
+
     trades = pd.concat(all_trades, ignore_index=True)
     del all_trades
     
-    # Final sort (needed because files might overlap in time)
-    trades = trades.sort_values(config.timestamp_col).reset_index(drop=True)
+    # Final sort: ESSENTIAL to use 'mergesort' (stable)
+    trades = trades.sort_values(config.timestamp_col, kind='mergesort').reset_index(drop=True)
     
     if verbose:
         print(f"\nTotal trades: {len(trades):,}" + 
-              (f" (sampled from {total_original:,})" if sample_rate < 1.0 else ""))
+              (f" (sampled from approx {int(total_original):,})" if sample_rate < 1.0 else ""))
         print(f"Date range: {pd.to_datetime(trades[config.timestamp_col].min(), unit='s')} "
               f"to {pd.to_datetime(trades[config.timestamp_col].max(), unit='s')}")
         
-        # Memory usage
         mem_mb = trades.memory_usage(deep=True).sum() / 1024 / 1024
         print(f"Memory usage: {mem_mb:.1f} MB")
     
@@ -105,35 +149,18 @@ def load_trades(config: DataConfig, verbose: bool = True, sample_rate: float = 1
 def preprocess_trades(trades: pd.DataFrame, config: DataConfig) -> pd.DataFrame:
     """
     Preprocess raw trade data.
-    
-    Args:
-        trades: Raw trade DataFrame
-        config: DataConfig with column names
-        
-    Returns:
-        Preprocessed DataFrame
     """
     df = trades.copy()
     
-    # Convert timestamp to datetime
     df['datetime'] = pd.to_datetime(df[config.timestamp_col], unit='s')
-    
-    # Encode side as numeric (-1 for Sell, +1 for Buy)
     df['side_num'] = df[config.side_col].map({'Buy': 1, 'Sell': -1})
     
-    # Encode tick direction
     tick_map = {
-        'PlusTick': 1,
-        'ZeroPlusTick': 0.5,
-        'MinusTick': -1,
-        'ZeroMinusTick': -0.5
+        'PlusTick': 1, 'ZeroPlusTick': 0.5, 'MinusTick': -1, 'ZeroMinusTick': -0.5
     }
     df['tick_dir_num'] = df[config.tick_direction_col].map(tick_map).fillna(0)
     
-    # Calculate trade value
     df['value'] = df[config.price_col] * df[config.size_col]
-    
-    # Calculate signed volume (positive for buys, negative for sells)
     df['signed_size'] = df[config.size_col] * df['side_num']
     df['signed_value'] = df['value'] * df['side_num']
     
@@ -147,31 +174,21 @@ def aggregate_to_bars(
 ) -> pd.DataFrame:
     """
     Aggregate raw trades into OHLCV bars.
-    
-    Args:
-        trades: Preprocessed trade DataFrame
-        timeframe_seconds: Bar size in seconds
-        config: DataConfig with column names
-        
-    Returns:
-        DataFrame with OHLCV bars and additional metrics
+    MEMORY OPTIMIZED: Avoids df.copy() to save RAM during multiprocessing.
     """
-    df = trades.copy()
+    # Calculate grouping key
+    bar_time_series = (trades[config.timestamp_col] // timeframe_seconds) * timeframe_seconds
     
-    # Create time buckets
-    df['bar_time'] = (df[config.timestamp_col] // timeframe_seconds) * timeframe_seconds
-    df['bar_datetime'] = pd.to_datetime(df['bar_time'], unit='s')
-    
-    # Aggregate
-    bars = df.groupby('bar_time').agg({
+    # Aggregate directly on the original trades df
+    bars = trades.groupby(bar_time_series).agg({
         config.price_col: ['first', 'max', 'min', 'last'],
         config.size_col: 'sum',
         'value': 'sum',
-        'side_num': 'sum',  # Net buy/sell count
-        'signed_size': 'sum',  # Net volume
-        'signed_value': 'sum',  # Net value
-        'tick_dir_num': 'mean',  # Average tick direction
-        config.timestamp_col: 'count',  # Trade count
+        'side_num': 'sum', 
+        'signed_size': 'sum', 
+        'signed_value': 'sum', 
+        'tick_dir_num': 'mean', 
+        config.timestamp_col: 'count', 
     })
     
     # Flatten column names
@@ -182,6 +199,7 @@ def aggregate_to_bars(
         'avg_tick_dir', 'trade_count'
     ]
     
+    bars.index.name = 'bar_time'
     bars = bars.reset_index()
     bars['datetime'] = pd.to_datetime(bars['bar_time'], unit='s')
     
@@ -190,19 +208,32 @@ def aggregate_to_bars(
     bars['sell_volume'] = (bars['volume'] - bars['net_volume']) / 2
     bars['buy_sell_imbalance'] = bars['net_volume'] / bars['volume'].replace(0, np.nan)
     
-    # VWAP
     bars['vwap'] = bars['value'] / bars['volume'].replace(0, np.nan)
-    
-    # Trade intensity (trades per second)
     bars['trade_intensity'] = bars['trade_count'] / timeframe_seconds
-    
-    # Average trade size
     bars['avg_trade_size'] = bars['volume'] / bars['trade_count'].replace(0, np.nan)
     
-    # Fill NaN values
     bars = bars.fillna(method='ffill')
     
     return bars
+
+
+def _generate_bars_worker(seconds: int, name: str, config: DataConfig):
+    """
+    Worker function. 
+    Reads from the GLOBAL variable `_shared_trades_df` to avoid pickling overhead.
+    """
+    global _shared_trades_df
+    if _shared_trades_df is None:
+        raise ValueError(f"Worker {name} found empty shared dataframe!")
+    
+    # LOGGING: Print here so user sees tasks starting concurrently
+    # flush=True is required to force the output to appear immediately in the terminal
+    print(f"  [Worker] > Starting {name} bar creation...", flush=True)
+    
+    bars = aggregate_to_bars(_shared_trades_df, seconds, config)
+    
+    print(f"  [Worker] V Finished {name} ({len(bars):,} bars)", flush=True)
+    return name, bars
 
 
 def create_multi_timeframe_bars(
@@ -212,38 +243,60 @@ def create_multi_timeframe_bars(
     config: DataConfig
 ) -> dict:
     """
-    Create bars for multiple timeframes.
-    
-    Args:
-        trades: Preprocessed trade DataFrame
-        timeframes_seconds: List of timeframe sizes in seconds
-        timeframe_names: Names for each timeframe
-        config: DataConfig
-        
-    Returns:
-        Dictionary mapping timeframe name to bar DataFrame
+    Create bars for multiple timeframes concurrently using Multiprocessing + Shared Memory.
     """
+    global _shared_trades_df
     bars_dict = {}
     
-    for tf_seconds, tf_name in zip(timeframes_seconds, timeframe_names):
-        print(f"  Creating {tf_name} bars...")
-        bars = aggregate_to_bars(trades, tf_seconds, config)
-        bars_dict[tf_name] = bars
-        print(f"    -> {len(bars):,} bars")
+    # 1. Store trades in global variable for Zero-Copy access by workers
+    _shared_trades_df = trades
+    
+    # Detect optimal CPU count (leaving 1 core free for OS/SSH if possible)
+    cpu_count = multiprocessing.cpu_count()
+    # If we have 4 cores, use 3. If 2, use 2. If 1, use 1.
+    MAX_WORKERS = max(1, cpu_count - 1) if cpu_count > 2 else cpu_count
+    
+    print(f"Starting TRUE concurrent bar creation for {len(timeframe_names)} timeframes...")
+    print(f"  (Using Fork-based Multiprocessing with {MAX_WORKERS} workers)")
+    print(f"  (OMP/MKL threading disabled per process to avoid CPU contention)")
+
+    try:
+        # 2. Use 'fork' context. 
+        # This is CRITICAL for Linux/Mac to share memory without copying.
+        ctx = multiprocessing.get_context('fork')
+        
+        with concurrent.futures.ProcessPoolExecutor(max_workers=MAX_WORKERS, mp_context=ctx) as executor:
+            # Note: We do NOT pass 'trades' as an argument here.
+            future_to_name = {
+                executor.submit(_generate_bars_worker, sec, name, config): name
+                for sec, name in zip(timeframes_seconds, timeframe_names)
+            }
+            
+            # We wait for completion here, but the print statements inside 
+            # _generate_bars_worker will show you the concurrency in real-time.
+            for future in concurrent.futures.as_completed(future_to_name):
+                name = future_to_name[future]
+                try:
+                    tf_name, bars = future.result()
+                    bars_dict[tf_name] = bars
+                    # Removed the print here to avoid confusion. 
+                    # The worker handles printing now.
+                except Exception as exc:
+                    print(f"  -> {name} generated an exception: {exc}")
+                    
+    finally:
+        # 3. Cleanup global memory
+        _shared_trades_df = None
     
     return bars_dict
 
 
 if __name__ == "__main__":
-    # Test the data loader
     from config import DEFAULT_CONFIG
-    
     config = DEFAULT_CONFIG.data
-    
-    # Adjust path for testing
     config.data_dir = Path("./data")
     
-    print("Loading trades...")
+    print("Loading trades (Deterministic)...")
     trades = load_trades(config)
     
     print("\nPreprocessing...")
@@ -258,4 +311,9 @@ if __name__ == "__main__":
     )
     
     print("\nSample 5m bars:")
-    print(bars['5m'].head(10))
+    if '5m' in bars:
+        print(bars['5m'].head(10))
+    else:
+        first_key = list(bars.keys())[0]
+        print(f"(5m not found, showing {first_key})")
+        print(bars[first_key].head(10))

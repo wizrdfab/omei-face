@@ -1,0 +1,398 @@
+{
+  "timestamp": "20251209_223322",
+  "sections": [
+    {
+      "name": "1. Data Loading",
+      "timestamp": "2025-12-09T22:33:22.567884",
+      "metrics": {
+        "total_trades": 3313761,
+        "sample_rate": 0.4,
+        "trades_stats": {
+          "shape": [
+            3313761,
+            12
+          ],
+          "memory_mb": 720.8824481964111,
+          "dtypes": {
+            "float64": 4,
+            "object": 3,
+            "float32": 3,
+            "datetime64[ns]": 1,
+            "int64": 1
+          },
+          "null_counts": 0.0,
+          "null_columns": []
+        }
+      },
+      "warnings": [],
+      "data_samples": {}
+    },
+    {
+      "name": "2. Bar Creation",
+      "timestamp": "2025-12-09T22:33:42.775278",
+      "metrics": {
+        "base_timeframe": "1m",
+        "bars_1m": 11520,
+        "bars_1m_stats": {
+          "shape": [
+            11520,
+            19
+          ],
+          "memory_mb": 1.3624305725097656,
+          "dtypes": {
+            "float64": 9,
+            "float32": 7,
+            "int64": 2,
+            "datetime64[ns]": 1
+          },
+          "null_counts": 0.0,
+          "null_columns": []
+        },
+        "bars_5m": 2304,
+        "bars_15m": 768,
+        "bars_30m": 384,
+        "bars_1h": 192,
+        "bars_4h": 48
+      },
+      "warnings": [],
+      "data_samples": {}
+    },
+    {
+      "name": "3. Feature Calculation",
+      "timestamp": "2025-12-09T22:33:47.319877",
+      "metrics": {
+        "num_features": 479,
+        "featured_data_stats": {
+          "shape": [
+            11520,
+            505
+          ],
+          "memory_mb": 40.605594635009766,
+          "dtypes": {
+            "float64": 414,
+            "float32": 65,
+            "int64": 13,
+            "bool": 12,
+            "datetime64[ns]": 1
+          },
+          "null_counts": 287359.0,
+          "null_columns": [
+            "1m_ema_9_slope",
+            "1m_ema_10_slope",
+            "1m_ema_21_slope",
+            "1m_ema_50_slope",
+            "1m_ema_100_slope",
+            "1m_atr",
+            "1m_sma_20",
+            "1m_sma_20_slope",
+            "1m_kijun_26",
+            "1m_kijun_26_slope"
+          ]
+        }
+      },
+      "warnings": [],
+      "data_samples": {}
+    },
+    {
+      "name": "4. Label Generation",
+      "timestamp": "2025-12-09T22:34:01.288354",
+      "metrics": {
+        "labeled_samples": 11494,
+        "final_feature_count": 479,
+        "trend_label_distribution": {
+          "-1.0": 2883,
+          "0.0": 5812,
+          "1.0": 2799
+        },
+        "regime_distribution": {
+          "0": 4612,
+          "1": 3385,
+          "2": 3286,
+          "3": 211
+        },
+        "pullback_success_distribution": {
+          "0.0": 1786,
+          "1.0": 781
+        }
+      },
+      "warnings": [],
+      "data_samples": {}
+    },
+    {
+      "name": "5. Data Split",
+      "timestamp": "2025-12-09T22:34:04.760311",
+      "metrics": {},
+      "warnings": [],
+      "data_samples": {}
+    },
+    {
+      "name": "5b. Leakage Detection - Feature-Label Correlations",
+      "timestamp": "2025-12-09T22:34:04.813498",
+      "metrics": {
+        "trend_label_top_correlations": {
+          "15m_anchor_vwap_15m_distance_atr": 0.39920192544667116,
+          "15m_anchor_vwap_15m_distance_pct": 0.38745596540133787,
+          "30m_anchor_vwap_30m_distance_pct": 0.3854691285040856,
+          "30m_anchor_vwap_30m_distance_atr": 0.38377859986310336,
+          "15m_returns": 0.35519397709133615,
+          "15m_candle_direction": 0.35370892146324184,
+          "30m_candle_direction": 0.3492736665111158,
+          "30m_returns": 0.34002181839708995,
+          "5m_anchor_vwap_5m_distance_atr": 0.32333682047039236,
+          "5m_anchor_vwap_5m_distance_pct": 0.318190012444293,
+          "15m_avg_tick_dir": 0.3061906682788869,
+          "1h_returns": 0.30284733675796655,
+          "1h_candle_direction": 0.2871876833026422,
+          "30m_avg_tick_dir": 0.2862650901920459,
+          "30m_buy_sell_imbalance": 0.26781201005874555,
+          "15m_net_side": 0.2651242440968563,
+          "5m_returns": 0.2534948109528888,
+          "30m_net_side": 0.24930627500689315,
+          "30m_net_volume": 0.2464086472568355,
+          "15m_buy_sell_imbalance": 0.24359500753048224
+        },
+        "regime_top_correlations": {
+          "1m_adx": 0.5283442201184847,
+          "1m_ema_alignment": 0.37070424553579345,
+          "1m_ema_50_slope_norm": 0.3492050593881655,
+          "1m_price_vs_ema_50": 0.3492050593881591,
+          "1m_price_vs_ema_100": 0.3448135477035039,
+          "1m_ema_100_slope_norm": 0.3448135477035026,
+          "5m_bb_position": 0.3389651231689456,
+          "5m_anchor_sma20_5m_distance_atr": 0.3356214465721575,
+          "5m_price_vs_ema_21": 0.32958366886142687,
+          "5m_ema_21_slope_norm": 0.32958366886142365,
+          "5m_price_vs_ema_10": 0.3142552524527804,
+          "5m_ema_10_slope_norm": 0.3142552524527799,
+          "5m_anchor_kijun_5m_distance_atr": 0.3125575063756348,
+          "1m_ema_50_slope": 0.3123528796846018,
+          "1m_ema_100_slope": 0.3075642196623932,
+          "5m_ema_9_slope_norm": 0.3073168305881704,
+          "5m_price_vs_ema_9": 0.3073168305881677,
+          "5m_anchor_ema9_5m_distance_atr": 0.3073168305881677,
+          "5m_anchor_sma20_5m_distance_pct": 0.30482199667305626,
+          "1m_di_diff": 0.30478838077739484
+        }
+      },
+      "warnings": [],
+      "data_samples": {}
+    },
+    {
+      "name": "6. Model Training",
+      "timestamp": "2025-12-09T22:34:05.077863",
+      "metrics": {
+        "TrendClassifier_metrics": {
+          "train_accuracy": 0.9571162212554382,
+          "val_accuracy": 0.6305104408352669
+        },
+        "TrendClassifier_top_features": {
+          "1m_dist_from_high": 265.0,
+          "15m_anchor_vwap_15m_slope": 233.0,
+          "1m_dist_from_low": 230.0,
+          "30m_anchor_vwap_30m_slope": 192.0,
+          "1m_price_vs_ema_100": 186.0,
+          "5m_anchor_vwap_5m_distance_atr": 185.0,
+          "1m_price_vs_ema_50": 183.0,
+          "15m_anchor_vwap_15m_distance_pct": 179.0,
+          "15m_returns": 175.0,
+          "30m_returns": 169.0,
+          "1m_price_vs_ema_21": 159.0,
+          "5m_anchor_vwap_5m_distance_pct": 156.0,
+          "5m_returns": 149.0,
+          "1m_ema_50_slope": 144.0,
+          "30m_anchor_vwap_30m_distance_pct": 136.0,
+          "1h_returns": 136.0,
+          "1m_momentum_10": 135.0,
+          "1m_bb_position": 129.0,
+          "1m_obv_slope": 125.0,
+          "1m_plus_di": 122.0
+        },
+        "pullback_samples_train": 1822,
+        "pullback_samples_val": 387,
+        "pullback_success_train_distribution": {
+          "0": 1245,
+          "1": 577
+        },
+        "pullback_success_top_correlations": {
+          "5m_anchor_nearest_distance_atr": 0.14819276520800292,
+          "30m_anchor_nearest_distance_atr": 0.13178065510652578,
+          "1h_body_size": 0.12391647643684457,
+          "1h_kijun_26_slope": 0.10752644846261844,
+          "4h_body_size": 0.10091978449873092,
+          "30m_body_size": 0.08901061713040581,
+          "5m_size_ma": 0.08844030781411712,
+          "15m_adx_slope": 0.08804249832481881,
+          "30m_dist_from_high": 0.08155955669227455,
+          "15m_imbalance_ma": 0.08057779514260735,
+          "5m_sma_20": 0.08035439961834229,
+          "5m_anchor_sma20_5m_value": 0.08035439961834229,
+          "1h_adx": 0.07888891049681314,
+          "15m_anchor_kijun_15m_touch_rate": 0.07855605685755417,
+          "15m_trade_intensity": 0.0776183511517889,
+          "15m_intensity_ratio": 0.07701168061970667,
+          "30m_trade_intensity": 0.07518530179577303,
+          "4h_kijun_26_slope": 0.07271877556906653,
+          "15m_volume_ratio": 0.0717548969829801,
+          "4h_net_side": 0.07152769060407693
+        },
+        "EntryQualityModel_metrics": {
+          "train_accuracy": 0.9681668496158068,
+          "train_precision": 0.9779005524861878,
+          "val_accuracy": 0.6873385012919897,
+          "val_precision": 0.4342105263157895
+        },
+        "EntryQualityModel_top_features": {
+          "15m_returns": 44.0,
+          "1m_price_vs_ema_50": 35.0,
+          "1m_ema_50_slope": 34.0,
+          "5m_returns": 34.0,
+          "15m_price_vs_ema_9": 34.0,
+          "1m_price_vs_ema_100": 33.0,
+          "15m_anchor_vwap_15m_distance_atr": 32.0,
+          "5m_anchor_vwap_5m_slope": 29.0,
+          "1m_ema_100_slope": 27.0,
+          "15m_anchor_vwap_15m_slope": 27.0,
+          "30m_anchor_vwap_30m_slope": 26.0,
+          "1m_dist_from_low": 25.0,
+          "5m_lower_wick": 25.0,
+          "5m_net_side": 23.0,
+          "15m_avg_tick_dir": 22.0,
+          "1m_adx": 20.0,
+          "5m_avg_tick_dir": 19.0,
+          "5m_ema_9_slope": 19.0,
+          "5m_momentum_5": 19.0,
+          "5m_upper_wick": 19.0
+        }
+      },
+      "warnings": [],
+      "data_samples": {}
+    },
+    {
+      "name": "6c. Regime Classifier Training",
+      "timestamp": "2025-12-09T22:34:23.622581",
+      "metrics": {
+        "regime_train_distribution": {
+          "0": 3219,
+          "1": 2134,
+          "2": 2537,
+          "3": 155
+        },
+        "regime_top_correlations": {
+          "1m_adx": 0.5283442201184847,
+          "1m_ema_alignment": 0.37070424553579345,
+          "1m_ema_50_slope_norm": 0.3492050593881655,
+          "1m_price_vs_ema_50": 0.3492050593881591,
+          "1m_price_vs_ema_100": 0.3448135477035039,
+          "1m_ema_100_slope_norm": 0.3448135477035026,
+          "5m_bb_position": 0.3389651231689456,
+          "5m_anchor_sma20_5m_distance_atr": 0.3356214465721575,
+          "5m_price_vs_ema_21": 0.32958366886142687,
+          "5m_ema_21_slope_norm": 0.32958366886142365,
+          "5m_price_vs_ema_10": 0.3142552524527804,
+          "5m_ema_10_slope_norm": 0.3142552524527799,
+          "5m_anchor_kijun_5m_distance_atr": 0.3125575063756348,
+          "1m_ema_50_slope": 0.3123528796846018,
+          "1m_ema_100_slope": 0.3075642196623932,
+          "5m_ema_9_slope_norm": 0.3073168305881704,
+          "5m_price_vs_ema_9": 0.3073168305881677,
+          "5m_anchor_ema9_5m_distance_atr": 0.3073168305881677,
+          "5m_anchor_sma20_5m_distance_pct": 0.30482199667305626,
+          "1m_di_diff": 0.30478838077739484
+        },
+        "RegimeClassifier_metrics": {
+          "train_accuracy": 1.0,
+          "val_accuracy": 0.9982598607888631
+        },
+        "RegimeClassifier_top_features": {
+          "1m_adx": 3030.0,
+          "1m_ema_alignment": 1254.0,
+          "1m_atr_percentile": 1093.0,
+          "1m_value": 676.0,
+          "1m_anchor_vwap_1m_distance_atr": 271.0,
+          "1h_obv_slope": 148.0,
+          "1m_net_side": 131.0,
+          "1m_obv": 123.0,
+          "1m_upper_wick": 111.0,
+          "5m_size_ma": 110.0,
+          "1h_lower_wick": 99.0,
+          "1m_ema_50": 94.0,
+          "1m_lower_wick": 93.0,
+          "1m_di_diff": 86.0,
+          "15m_size_ma": 86.0,
+          "1m_vwap": 85.0,
+          "5m_rsi": 82.0,
+          "5m_anchor_kijun_5m_touch_rate": 81.0,
+          "5m_obv_slope": 79.0,
+          "15m_anchor_nearest_distance_atr": 77.0
+        }
+      },
+      "warnings": [
+        "\u26a0\ufe0f WARNING: RegimeClassifier train_accuracy = 1.0000 (suspiciously high)",
+        "\u26a0\ufe0f WARNING: RegimeClassifier val_accuracy = 0.9983 (suspiciously high)"
+      ],
+      "data_samples": {}
+    },
+    {
+      "name": "7. Test Set Evaluation",
+      "timestamp": "2025-12-09T22:34:35.006223",
+      "metrics": {
+        "trend_classifier_test_accuracy": 0.6428985507246376,
+        "trend_class_Down_accuracy": 0.5055555555555555,
+        "trend_class_Neutral_accuracy": 0.78177727784027,
+        "trend_class_Up_accuracy": 0.48739495798319327
+      },
+      "warnings": [],
+      "data_samples": {}
+    },
+    {
+      "name": "8. Final Summary",
+      "timestamp": "2025-12-09T22:34:35.100801",
+      "metrics": {
+        "final_test_accuracy": 0.6428985507246376,
+        "result_total_trades": 3313761,
+        "result_base_timeframe": "1m",
+        "result_num_features": 479,
+        "result_labeled_samples": 11494,
+        "result_train_size": 8045,
+        "result_val_size": 1724,
+        "result_test_size": 1725,
+        "result_test_trend_accuracy": 0.6428985507246376
+      },
+      "warnings": [],
+      "data_samples": {}
+    }
+  ],
+  "all_metrics": {
+    "total_trades": 3313761,
+    "sample_rate": 0.4,
+    "base_timeframe": "1m",
+    "bars_1m": 11520,
+    "bars_5m": 2304,
+    "bars_15m": 768,
+    "bars_30m": 384,
+    "bars_1h": 192,
+    "bars_4h": 48,
+    "num_features": 479,
+    "labeled_samples": 11494,
+    "final_feature_count": 479,
+    "pullback_samples_train": 1822,
+    "pullback_samples_val": 387,
+    "trend_classifier_test_accuracy": 0.6428985507246376,
+    "trend_class_Down_accuracy": 0.5055555555555555,
+    "trend_class_Neutral_accuracy": 0.78177727784027,
+    "trend_class_Up_accuracy": 0.48739495798319327,
+    "final_test_accuracy": 0.6428985507246376,
+    "result_total_trades": 3313761,
+    "result_base_timeframe": "1m",
+    "result_num_features": 479,
+    "result_labeled_samples": 11494,
+    "result_train_size": 8045,
+    "result_val_size": 1724,
+    "result_test_size": 1725,
+    "result_test_trend_accuracy": 0.6428985507246376
+  },
+  "all_warnings": [
+    "\u26a0\ufe0f WARNING: RegimeClassifier train_accuracy = 1.0000 (suspiciously high)",
+    "\u26a0\ufe0f WARNING: RegimeClassifier val_accuracy = 0.9983 (suspiciously high)"
+  ]
+}
