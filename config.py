@@ -4,7 +4,17 @@ Adjust these parameters based on your setup and experimentation.
 """
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List
+from typing import List, Optional
+
+
+@dataclass
+class BounceAnchorConfig:
+    """Configuration for bounce anchor indicators."""
+
+    name: str
+    timeframe: str
+    kind: str  # 'ema', 'sma', 'vwap', or 'kijun'
+    period: Optional[int] = None
 
 
 @dataclass
@@ -29,15 +39,22 @@ class FeatureConfig:
         60,      # 1m
         300,     # 5m
         900,     # 15m
+        1800,    # 30m
         3600,    # 1h
         14400,   # 4h
     ])
     timeframe_names: List[str] = field(default_factory=lambda: [
-        '1m', '5m', '15m', '1h', '4h'
+        '1m', '5m', '15m', '30m', '1h', '4h'
     ])
     
     # EMA periods
-    ema_periods: List[int] = field(default_factory=lambda: [10, 21, 50, 100])
+    ema_periods: List[int] = field(default_factory=lambda: [9, 10, 21, 50, 100])
+
+    # SMA periods for price anchors
+    price_sma_periods: List[int] = field(default_factory=lambda: [20])
+
+    # Ichimoku baseline (Kijun Sen) periods
+    kijun_periods: List[int] = field(default_factory=lambda: [26])
     
     # Other indicator periods
     rsi_period: int = 14
@@ -48,9 +65,28 @@ class FeatureConfig:
     
     # Volume features
     volume_ma_period: int = 20
-    
+
     # Lookback for structure detection (in bars)
     swing_lookback: int = 10
+
+    # Bounce anchor configuration for entry-quality modeling
+    bounce_anchors: List[BounceAnchorConfig] = field(default_factory=lambda: [
+        BounceAnchorConfig(name='vwap_1m', timeframe='1m', kind='vwap'),
+        BounceAnchorConfig(name='vwap_5m', timeframe='5m', kind='vwap'),
+        BounceAnchorConfig(name='vwap_15m', timeframe='15m', kind='vwap'),
+        BounceAnchorConfig(name='vwap_30m', timeframe='30m', kind='vwap'),
+        BounceAnchorConfig(name='ema9_5m', timeframe='5m', kind='ema', period=9),
+        BounceAnchorConfig(name='ema9_15m', timeframe='15m', kind='ema', period=9),
+        BounceAnchorConfig(name='ema9_30m', timeframe='30m', kind='ema', period=9),
+        BounceAnchorConfig(name='sma20_5m', timeframe='5m', kind='sma', period=20),
+        BounceAnchorConfig(name='sma20_15m', timeframe='15m', kind='sma', period=20),
+        BounceAnchorConfig(name='sma20_30m', timeframe='30m', kind='sma', period=20),
+        BounceAnchorConfig(name='kijun_5m', timeframe='5m', kind='kijun', period=26),
+        BounceAnchorConfig(name='kijun_15m', timeframe='15m', kind='kijun', period=26),
+        BounceAnchorConfig(name='kijun_30m', timeframe='30m', kind='kijun', period=26),
+    ])
+    bounce_touch_threshold_atr: float = 0.35
+    bounce_touch_lookback: int = 20
 
 
 @dataclass

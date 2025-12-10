@@ -5,7 +5,7 @@ Calculates technical indicators and microstructure features.
 import pandas as pd
 import numpy as np
 from typing import List, Dict, Optional
-from config import FeatureConfig
+from config import FeatureConfig, BounceAnchorConfig
 
 
 # =============================================================================
@@ -20,6 +20,13 @@ def ema(series: pd.Series, period: int) -> pd.Series:
 def sma(series: pd.Series, period: int) -> pd.Series:
     """Simple Moving Average"""
     return series.rolling(window=period).mean()
+
+
+def kijun_sen(high: pd.Series, low: pd.Series, period: int = 26) -> pd.Series:
+    """Ichimoku Kijun Sen (baseline)"""
+    highest_high = high.rolling(window=period).max()
+    lowest_low = low.rolling(window=period).min()
+    return (highest_high + lowest_low) / 2
 
 
 def rsi(close: pd.Series, period: int = 14) -> pd.Series:
@@ -159,7 +166,11 @@ def get_recent_swing_low(low: pd.Series, swing_lows: pd.Series, current_idx: int
 # Feature Calculator
 # =============================================================================
 
-def calculate_features_for_timeframe(bars: pd.DataFrame, config: FeatureConfig) -> pd.DataFrame:
+def calculate_features_for_timeframe(
+    bars: pd.DataFrame,
+    config: FeatureConfig,
+    timeframe_name: str = ""
+) -> pd.DataFrame:
     """
     Calculate all features for a single timeframe.
     
@@ -179,6 +190,16 @@ def calculate_features_for_timeframe(bars: pd.DataFrame, config: FeatureConfig) 
     
     # Price vs EMAs (normalized by ATR)
     df['atr'] = atr(df['high'], df['low'], df['close'], config.atr_period)
+
+    # --- SMAs (price anchors) ---
+    for period in config.price_sma_periods:
+        df[f'sma_{period}'] = sma(df['close'], period)
+        df[f'sma_{period}_slope'] = df[f'sma_{period}'].diff()
+
+    # --- Ichimoku baseline (Kijun Sen) ---
+    for period in config.kijun_periods:
+        df[f'kijun_{period}'] = kijun_sen(df['high'], df['low'], period)
+        df[f'kijun_{period}_slope'] = df[f'kijun_{period}'].diff()
     
     for period in config.ema_periods:
         df[f'price_vs_ema_{period}'] = (df['close'] - df[f'ema_{period}']) / df['atr'].replace(0, np.nan)
@@ -265,7 +286,73 @@ def calculate_features_for_timeframe(bars: pd.DataFrame, config: FeatureConfig) 
     df['upper_wick'] = (df['high'] - df[['open', 'close']].max(axis=1)) / df['atr'].replace(0, np.nan)
     df['lower_wick'] = (df[['open', 'close']].min(axis=1) - df['low']) / df['atr'].replace(0, np.nan)
     df['candle_direction'] = np.sign(df['close'] - df['open'])
-    
+
+    # --- Bounce anchor features for entry-quality modeling ---
+    df = add_bounce_anchor_features(df, config, timeframe_name)
+
+    return df
+
+
+def _get_anchor_series(df: pd.DataFrame, anchor: BounceAnchorConfig) -> Optional[pd.Series]:
+    """Resolve the series backing a bounce anchor configuration."""
+
+    if anchor.kind == 'ema' and anchor.period is not None:
+        col = f'ema_{anchor.period}'
+    elif anchor.kind == 'sma' and anchor.period is not None:
+        col = f'sma_{anchor.period}'
+    elif anchor.kind == 'kijun' and anchor.period is not None:
+        col = f'kijun_{anchor.period}'
+    elif anchor.kind == 'vwap':
+        col = 'vwap'
+    else:
+        return None
+
+    if col not in df.columns:
+        return None
+
+    return df[col]
+
+
+def add_bounce_anchor_features(
+    df: pd.DataFrame,
+    config: FeatureConfig,
+    timeframe_name: str
+) -> pd.DataFrame:
+    """Add bounce anchor proximity/slope features for the given timeframe."""
+
+    if not timeframe_name:
+        return df
+
+    anchor_distances = []
+
+    for anchor in config.bounce_anchors:
+        if anchor.timeframe != timeframe_name:
+            continue
+
+        anchor_series = _get_anchor_series(df, anchor)
+        if anchor_series is None:
+            continue
+
+        dist_atr = (df['close'] - anchor_series) / df['atr'].replace(0, np.nan)
+        dist_pct = (df['close'] - anchor_series) / anchor_series.replace(0, np.nan)
+
+        df[f'anchor_{anchor.name}_value'] = anchor_series
+        df[f'anchor_{anchor.name}_distance_atr'] = dist_atr
+        df[f'anchor_{anchor.name}_distance_pct'] = dist_pct
+        df[f'anchor_{anchor.name}_slope'] = anchor_series.diff()
+
+        # Tag frequency of price touching the anchor
+        touch_mask = dist_atr.abs() <= config.bounce_touch_threshold_atr
+        df[f'anchor_{anchor.name}_touch_rate'] = touch_mask.rolling(
+            config.bounce_touch_lookback
+        ).mean()
+
+        anchor_distances.append(dist_atr.abs())
+
+    if anchor_distances:
+        anchor_distance_df = pd.concat(anchor_distances, axis=1)
+        df['anchor_nearest_distance_atr'] = anchor_distance_df.min(axis=1)
+
     return df
 
 
@@ -291,7 +378,7 @@ def calculate_multi_timeframe_features(
     featured_bars = {}
     for tf_name, bars in bars_dict.items():
         print(f"  Processing {tf_name}...")
-        featured_bars[tf_name] = calculate_features_for_timeframe(bars, config)
+        featured_bars[tf_name] = calculate_features_for_timeframe(bars, config, tf_name)
     
     # Start with base timeframe
     result = featured_bars[base_tf].copy()
