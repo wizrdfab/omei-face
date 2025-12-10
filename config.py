@@ -77,10 +77,13 @@ class FeatureConfig:
         BounceAnchorConfig(name='vwap_30m', timeframe='30m', kind='vwap'),
         BounceAnchorConfig(name='ema9_5m', timeframe='5m', kind='ema', period=9),
         BounceAnchorConfig(name='ema9_15m', timeframe='15m', kind='ema', period=9),
+        BounceAnchorConfig(name='ema9_30m', timeframe='30m', kind='ema', period=9),
         BounceAnchorConfig(name='sma20_5m', timeframe='5m', kind='sma', period=20),
         BounceAnchorConfig(name='sma20_15m', timeframe='15m', kind='sma', period=20),
+        BounceAnchorConfig(name='sma20_30m', timeframe='30m', kind='sma', period=20),
         BounceAnchorConfig(name='kijun_5m', timeframe='5m', kind='kijun', period=26),
         BounceAnchorConfig(name='kijun_15m', timeframe='15m', kind='kijun', period=26),
+        BounceAnchorConfig(name='kijun_30m', timeframe='30m', kind='kijun', period=26),
     ])
     bounce_touch_threshold_atr: float = 0.35
     bounce_touch_lookback: int = 20

@@ -19,7 +19,7 @@ The TrendFollower serves the market by:
   - TrendClassifier: Predicts trend direction and probability
   - EntryQualityModel: Predicts pullback bounce probability
   - RegimeClassifier: Identifies market regime (trending/ranging/volatile)
-- **Bounce anchors**: Distances/slopes to VWAP, EMA9, SMA20, and Ichimoku Kijun anchors (1m–30m+) to let the entry model learn which bounce targets work best.
+- **Bounce anchors**: Distances/slopes to VWAP, EMA9, SMA20, and Ichimoku Kijun anchors (1m–30m+) so the entry model can learn which bounce targets work best.
 - **Signal grading**: A/B/C quality grades based on confluence
 - **Built-in backtester**: Evaluate strategy performance before going live
 
